@@ -6,6 +6,8 @@ apt-get update -y
 
 apt-get install -y --no-install-recommends \
         python-setuptools \
-        emacs
+        emacs \
+        vim \
+        jq
 
 rm -rf /var/lib/apt/lists/*
