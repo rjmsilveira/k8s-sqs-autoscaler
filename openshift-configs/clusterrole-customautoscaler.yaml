@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ClusterRole
+metadata:
+  annotations:
+    openshift.io/description: A user that can change pods count
+  name: customautoscaler
+rules:
+  - apiGroups:
+      - ""
+    attributeRestrictions: null
+    resources:
+      - replicationcontrollers
+      - deploymentconfigs
+      - deployments
+      - configmaps
+    verbs:
+      - get
+      - list
+      - update
+      - patch
+      - watch
+# oc adm policy add-cluster-role-to-user customautoscaler  system:serviceaccount:[namespace]:customautoscaler

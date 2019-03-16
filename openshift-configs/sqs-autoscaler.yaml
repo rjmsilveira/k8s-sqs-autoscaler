@@ -1,0 +1,73 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sqs-autoscaler
+  namespace: namespace-where-to-deploy
+  labels:
+    app: sqs-autoscaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqs-autoscaler
+  template:
+    metadata:
+      labels:
+        app: sqs-autoscaler
+    spec:
+      selector:
+        matchLabels:
+          app: sqs-autoscaler
+      containers:
+        - name: sqs-autoscaler
+          image: rjmsilveira/openshift-sqs-autoscale:1.0.2
+          command:
+            - ./k8s-sqs-autoscaler
+            - --sqs-queue-url=queue-url-to-watch # required
+            - --kubernetes-deployment=deplyment-name
+            - --kubernetes-namespace=$(K8S_NAMESPACE) # optional
+            - --aws-region=eu-west-1 #required
+            - --poll-period=10 # optional
+            - --scale-down-cool-down=30 # optional
+            - --scale-up-cool-down=30 # optional
+            - --scale-up-messages=100 # optional
+            - --scale-down-messages=100 # optional
+            - --max-pods=20 # optional
+            - --min-pods=1 # optional
+          env:
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: LOGGING_LEVEL
+              value: ""
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: secret-file-name
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-file-name
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              valueFrom:
+                configMapKeyRef:
+                  key: AWS_REGION
+                  name: secret-file-name
+          resources:
+            requests:
+              memory: "15Mi"
+              cpu: "150m"
+            limits:
+              memory: "30Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+          terminationMessagePath: /dev/termination-log
+      serviceAccountName: customautoscaler
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
