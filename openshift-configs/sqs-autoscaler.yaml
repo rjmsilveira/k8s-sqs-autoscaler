@@ -20,7 +20,7 @@ spec:
           app: sqs-autoscaler
       containers:
         - name: sqs-autoscaler
-          image: rjmsilveira/openshift-sqs-autoscale:1.0.2
+          image: rjmsilveira/openshift-sqs-autoscale:latest
           command:
             - ./k8s-sqs-autoscaler
             - --sqs-queue-url=queue-url-to-watch # required
