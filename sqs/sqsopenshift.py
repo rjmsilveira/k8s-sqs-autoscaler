@@ -21,6 +21,7 @@ class SQSPoller:
 
     def __init__(self, options):
         if environ.get('SERVICE_ACCOUNT_TOKEN') is None:
+            logger.debug('Fetching token from local file')
             if path.isfile('/run/secrets/kubernetes.io/serviceaccount/token'):
                 self.token = open(
                     '/run/secrets/kubernetes.io/serviceaccount/token').read().rstrip('\n')
@@ -29,7 +30,10 @@ class SQSPoller:
                     'Failed to fetch token of serviceaccount. Unable to continue')
                 sys.exit(1)
         else:
+            logger.debug('Fetching token from environment variable')
             self.token = environ.get('SERVICE_ACCOUNT_TOKEN')
+
+        logger.debug('Will use this token: '+self.token)
 
         if environ.get('KUBERNETES_PORT_443_TCP_ADDR') is None or environ.get('KUBERNETES_PORT_443_TCP_PORT') is None:
             logger.error('Cannot find environment variables with api endpoint')
@@ -62,14 +66,14 @@ class SQSPoller:
                 logger.info("Scaling up")
                 self.last_scale_up_time = t
             else:
-                logger.debug("Waiting for scale up cooldown")
+                logger.debug("Waiting for scale up cool down")
         if message_count <= self.options.scale_down_messages:
             if t - self.last_scale_down_time > self.options.scale_down_cool_down:
                 logger.info("Scaling down")
                 self.scale_down()
                 self.last_scale_down_time = t
             else:
-                logger.debug("Waiting for scale down cooldown")
+                logger.debug("Waiting for scale down cool down")
 
         # code for scale to use msg_count
         sleep(self.options.poll_period)
@@ -78,7 +82,8 @@ class SQSPoller:
         deployment = self.deployment()
         # logger.info(json.dumps(deployment))
         if deployment['spec']['replicas'] < self.options.max_pods:
-            logger.info("Scaling up")
+            logger.debug("Current replicas " +
+                         str(deployment['spec']['replicas']) + ". Scaling up")
             deployment['spec']['replicas'] += 1
             self.update_deployment(deployment)
             logger.info("Replicas: %s" % deployment['spec']['replicas'])
@@ -91,7 +96,8 @@ class SQSPoller:
     def scale_down(self):
         deployment = self.deployment()
         if deployment['spec']['replicas'] > self.options.min_pods:
-            logger.info("Scaling Down")
+            logger.debug("Current replicas " +
+                         str(deployment['spec']['replicas']) + ". Scaling Down")
             deployment['spec']['replicas'] -= 1
             self.update_deployment(deployment)
         elif deployment['spec']['replicas'] < self.options.min_pods:
@@ -116,6 +122,7 @@ class SQSPoller:
     def update_deployment(self, deployment):
         # Update the deployment
         data = '{"spec":{"replicas":%i}}' % deployment['spec']['replicas']
+        logger.debug('Will patch deployment with: '+str(data))
         api_response = requests.patch("https://"+self.k8s_endpoint + "/oapi/v1/namespaces/"+self.options.kubernetes_namespace+"/deploymentconfigs/"+self.options.kubernetes_deployment+"/scale",
                                       timeout=5,
                                       verify=False,
@@ -127,6 +134,8 @@ class SQSPoller:
                                       data=data)
         logger.debug("Deployment updated. status='%s'" %
                      str(api_response.status_code))
+        if api_response.status_code != 200:
+            logger.error("API response: "+str(api_response.content))
 
     def run(self):
         options = self.options

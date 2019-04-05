@@ -1,6 +1,6 @@
 ORG=rjmsilveira
 PROJ=openshift-sqs-autoscale
-VERSION=1.0.6
+VERSION=1.0.10
 
 .PHONY=release
 release:
