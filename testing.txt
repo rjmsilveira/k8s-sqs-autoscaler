@@ -3,7 +3,7 @@ Testing locally can be achieved by:
 - Exporting this two vars (update ADDR to match yours):
    - export KUBERNETES_PORT_443_TCP_ADDR="public_url_of_master_nodes"
    - export KUBERNETES_PORT_443_TCP_PORT=443
-   - export LOGGING_LEVEL=DEBUG [DEBUG,INFO,empty]
+   - export LOGGING_LEVEL=DEBUG [DEBUG,ERROR,INFO,empty]
    - export SERVICE_ACCOUNT_TOKEN=[valid-token]
 
 Run the k8s-sqs-autoscaler with the correct parameters:
