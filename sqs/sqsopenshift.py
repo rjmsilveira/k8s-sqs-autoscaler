@@ -120,7 +120,7 @@ class SQSPoller:
                                       timeout=5,
                                       verify=False,
                                       headers={
-                                          "Authorization": "Bearer gwUHhFMV2OOWbVFKGAq61AXP3hITh7Iozubpsdij2_s",
+                                          "Authorization": "Bearer " + self.token,
                                           "Accept": "application/json",
                                           "Content-Type": "application/merge-patch+json"
                                       },
