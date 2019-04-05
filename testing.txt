@@ -1,6 +1,8 @@
 Testing locally can be achieved by:
 - Logging in with kubectl to the cluster
+- Export AWS credentials with grant to perform get items on the queue you want to test
 - Exporting this two vars (update ADDR to match yours):
+   - export AWS_DEFAULT_REGION=[eu-west-1]
    - export KUBERNETES_PORT_443_TCP_ADDR="public_url_of_master_nodes"
    - export KUBERNETES_PORT_443_TCP_PORT=443
    - export LOGGING_LEVEL=DEBUG [DEBUG,ERROR,INFO,empty]

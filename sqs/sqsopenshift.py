@@ -115,8 +115,10 @@ class SQSPoller:
                                        "Authorization": "Bearer "+self.token,
                                        "Accept": "application/json"
                                    }).json()
-        if not deployments['items']:
-            raise Exception('No deploymentconfig found with that name!')
+
+        if deployments['code'] != 200:
+            raise Exception(
+                'Error fetching deploymentconfig! Error is: '+str(deployments['message']))
         return deployments['items'][0]
 
     def update_deployment(self, deployment):
@@ -132,10 +134,12 @@ class SQSPoller:
                                           "Content-Type": "application/merge-patch+json"
                                       },
                                       data=data)
-        logger.debug("Deployment updated. status='%s'" %
-                     str(api_response.status_code))
+
         if api_response.status_code != 200:
-            logger.error("API response: "+str(api_response.content))
+            raise Exception("Error updating deployment: " +
+                            str(api_response.content))
+        else:
+            logger.debug("Deployment updated")
 
     def run(self):
         options = self.options
