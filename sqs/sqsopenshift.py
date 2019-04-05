@@ -23,7 +23,7 @@ class SQSPoller:
         if environ.get('SERVICE_ACCOUNT_TOKEN') is None:
             if path.isfile('/run/secrets/kubernetes.io/serviceaccount/token'):
                 self.token = open(
-                    '/run/secrets/kubernetes.io/serviceaccount/token').read()
+                    '/run/secrets/kubernetes.io/serviceaccount/token').read().rstrip('\n')
             else:
                 logger.error(
                     'Failed to fetch token of serviceaccount. Unable to continue')
