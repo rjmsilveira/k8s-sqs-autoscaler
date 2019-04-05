@@ -116,7 +116,8 @@ class SQSPoller:
                                        "Accept": "application/json"
                                    }).json()
 
-        if deployments['code'] != 200:
+        # when code exists, it failed by any reason to perform curl
+        if 'code' in deployments:
             raise Exception(
                 'Error fetching deploymentconfig! Error is: '+str(deployments['message']))
         return deployments['items'][0]
