@@ -1,0 +1,17 @@
+Testing locally can be achieved by:
+- Logging in with kubectl to the cluster
+- Exporting this two vars (update ADDR to match yours):
+   - export KUBERNETES_PORT_443_TCP_ADDR="public_url_of_master_nodes"
+   - export KUBERNETES_PORT_443_TCP_PORT=443
+   - export LOGGING_LEVEL=DEBUG [DEBUG,INFO,empty]
+   - export SERVICE_ACCOUNT_TOKEN=[valid-token]
+
+Run the k8s-sqs-autoscaler with the correct parameters:
+  python k8s-sqs-autoscaler --sqs-queue-url [amazon-sqs-queue-fqdn-on-which-we-will-base-the-autoscale] 
+  --kubernetes-deployment [deployment-name]
+  --kubernetes-namespace [namespace-where-deployment-is]
+  --aws-region=eu-west-1 
+  --min-pods 1 
+  --poll-period 1 
+  --scale-down-cool-down 5 
+  --scale-up-cool-down 5

@@ -20,13 +20,16 @@ class SQSPoller:
     last_message_count = None
 
     def __init__(self, options):
-        if path.isfile('/run/secrets/kubernetes.io/serviceaccount/token'):
-            self.token = open(
-                '/run/secrets/kubernetes.io/serviceaccount/token').read()
+        if environ.get('SERVICE_ACCOUNT_TOKEN') is None:
+            if path.isfile('/run/secrets/kubernetes.io/serviceaccount/token'):
+                self.token = open(
+                    '/run/secrets/kubernetes.io/serviceaccount/token').read()
+            else:
+                logger.error(
+                    'Failed to fetch token of serviceaccount. Unable to continue')
+                sys.exit(1)
         else:
-            logger.error(
-                'Failed to fetch token of serviceaccount. Unable to continue')
-            sys.exit(1)
+            self.token = environ.get('SERVICE_ACCOUNT_TOKEN')
 
         if environ.get('KUBERNETES_PORT_443_TCP_ADDR') is None or environ.get('KUBERNETES_PORT_443_TCP_PORT') is None:
             logger.error('Cannot find environment variables with api endpoint')
@@ -103,7 +106,7 @@ class SQSPoller:
                                    timeout=5,
                                    verify=False,
                                    headers={
-                                       "Authorization": "Bearer gwUHhFMV2OOWbVFKGAq61AXP3hITh7Iozubpsdij2_s",
+                                       "Authorization": "Bearer "+self.token,
                                        "Accept": "application/json"
                                    }).json()
         if not deployments['items']:

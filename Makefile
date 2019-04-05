@@ -1,6 +1,6 @@
-ORG=sideshowbandana
-PROJ=k8s-sqs-autoscaler
-VERSION=1.0.1
+ORG=rjmsilveira
+PROJ=openshift-sqs-autoscale
+VERSION=1.0.3
 
 .PHONY=release
 release:
